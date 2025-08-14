@@ -3,6 +3,7 @@ kind: Namespace
 metadata:
   name: sql
 ---
+# MySQL Secret
 apiVersion: v1
 kind: Secret
 metadata:
@@ -10,14 +11,14 @@ metadata:
   namespace: sql
 type: Opaque
 data:
-  mysql-root-pass: b21hcjEyMzQ=  # "omar1234" base64
+  mysql-root-pass: b21hcjEyMzQ=  # base64 for "omar1234"
 ---
+# Persistent Volume (hostPath)
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: mysql-pv
 spec:
-  storageClassName: fast
   capacity:
     storage: 1Gi
   accessModes:
@@ -25,19 +26,20 @@ spec:
   hostPath:
     path: /mnt/data/mysql
 ---
+# Persistent Volume Claim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
   namespace: sql
 spec:
-  storageClassName: fast
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
 ---
+# MySQL Headless Service
 apiVersion: v1
 kind: Service
 metadata:
@@ -52,6 +54,7 @@ spec:
     app: todolist-app
     tier: database
 ---
+# MySQL StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -91,7 +94,6 @@ spec:
     - metadata:
         name: mysql-storage
       spec:
-        storageClassName: fast
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
