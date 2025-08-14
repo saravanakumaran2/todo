@@ -47,6 +47,7 @@ spec:
   clusterIP: None
   ports:
     - port: 3306
+      targetPort: 3306
   selector:
     app: todolist-app
     tier: database
@@ -81,11 +82,11 @@ spec:
                   name: mysql-secret
                   key: mysql-root-pass
           volumeMounts:
-            - name: mysql-vol
+            - name: mysql-storage
               mountPath: /var/lib/mysql
   volumeClaimTemplates:
     - metadata:
-        name: mysql-vol
+        name: mysql-storage
       spec:
         accessModes: ["ReadWriteOnce"]
         resources:
