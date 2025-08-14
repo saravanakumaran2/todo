@@ -1,11 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
 ---
-# -------------------------
 # Backend Deployment
-# -------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  namespace: backend
   labels:
     app: todolist-app
     tier: backend
@@ -27,14 +30,27 @@ spec:
           ports:
             - containerPort: 8081
               name: webserver-port
+          env:
+            - name: MYSQL_HOST
+              value: mysql.sql.svc.cluster.local
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: mysql-root-pass
+                  optional: true
+                  # note: secret is in 'sql' namespace, might need to duplicate or use ExternalSecret
 ---
-# -------------------------
-# Backend Service (ClusterIP only)
-# -------------------------
+# Backend Service (ClusterIP)
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-svc
+  namespace: backend
   labels:
     app: todolist-app
     tier: backend
