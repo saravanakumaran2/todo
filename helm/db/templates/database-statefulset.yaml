@@ -70,15 +70,11 @@ spec:
 # StatefulSet using static PVC
 # ----------------------------
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: mysql-statefulset
+  name: mysql
   namespace: sql
-  labels:
-    app: todolist-app
-    tier: database
 spec:
-  serviceName: mysql
   replicas: 1
   selector:
     matchLabels:
@@ -104,8 +100,8 @@ spec:
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
-  volumeClaimTemplates: []  # Not using templates, we use static PVC
-  volumes:
-    - name: mysql-storage
-      persistentVolumeClaim:
-        claimName: mysql-pvc
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
