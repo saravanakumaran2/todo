@@ -13,32 +13,6 @@ type: Opaque
 data:
   mysql-root-pass: b21hcjEyMzQ=  # base64 for "omar1234"
 ---
-# Persistent Volume (hostPath)
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: mysql-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /mnt/data/mysql
----
-# Persistent Volume Claim
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pvc
-  namespace: sql
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
 # MySQL Headless Service
 apiVersion: v1
 kind: Service
