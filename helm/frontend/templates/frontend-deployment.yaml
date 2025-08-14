@@ -37,14 +37,10 @@ kind: Service
 metadata:
   name: frontend
   namespace: frontend
-  labels:
-    app: todolist-app
-    tier: frontend
 spec:
   type: NodePort
   ports:
-    - protocol: TCP
-      port: 4173
+    - port: 4173
       targetPort: 4173
       nodePort: 30000
   selector:
