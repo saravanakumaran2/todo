@@ -44,26 +44,6 @@ spec:
     tier: backend
 ---
 
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-ingress-svc
-  namespace: k8-deployment
-spec:
-  ingressClassName: nginx
-  rules:
-     - host: todolist.app.com
-       http:
-          paths:
-            - path: /
-              pathType: Prefix
-              backend:
-                  service:
-                    name: backend-svc
-                    port:
-                      number: 8081
-                
-
 
 
 
