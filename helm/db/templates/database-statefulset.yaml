@@ -57,6 +57,9 @@ kind: StatefulSet
 metadata:
   name: mysql-statefulset
   namespace: sql
+  labels:
+    app: todolist-app
+    tier: database
 spec:
   serviceName: mysql
   replicas: 1
