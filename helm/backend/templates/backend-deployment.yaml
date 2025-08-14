@@ -1,75 +1,76 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: backend
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: db-secret
-  namespace: backend
-type: Opaque
-data:
-  db-username: cm9vdA==       # base64('root')
-  db-password: b21hcjEyMzQ=   # base64('omar1234')
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
-  namespace: backend
+  name: backend 
   labels:
     app: todolist-app
-    tier: backend
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: todolist-app
       tier: backend
+#  strategy:
+#    type: Recreate
   template:
     metadata:
+      name: webserver-pod
       labels:
         app: todolist-app
         tier: backend
     spec:
       containers:
-        - name: backend-container
-          image: joselin721/backend
-          ports:
-            - containerPort: 8081
-          env:
-            - name: DB_HOST
-              value: "mysql.sql.svc.cluster.local"
-            - name: DB_PORT
-              value: "3306"
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: db-username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: db-secret
-                  key: db-password
-            - name: DB_NAME
-              value: todolist
+      - image: joselin721/backend
+        name: backend-container
+        ports:
+        - containerPort: 8081
+          name: webserver-port
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-svc
-  namespace: backend
   labels:
     app: todolist-app
     tier: backend
 spec:
-  type: ClusterIP
+ # type: NodePort
+  ports:
+    - protocol: TCP 
+     # nodePort: 30001
+      port: 8081
+      targetPort: 8081
   selector:
     app: todolist-app
     tier: backend
-  ports:
-    - protocol: TCP
-      port: 8081
-      targetPort: 8081
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress-svc
+  namespace: k8-deployment
+spec:
+  ingressClassName: nginx
+  rules:
+     - host: todolist.app.com
+       http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                  service:
+                    name: backend-svc
+                    port:
+                      number: 8081
+                
+
+
+
+
+
+
+
+
+
+
+
