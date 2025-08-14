@@ -1,36 +1,19 @@
-# -------------------------
-# MySQL Service
-# -------------------------
 apiVersion: v1
-kind: Service
+kind: Namespace
 metadata:
-  name: mysql
-  labels:
-    app: todolist-app
-    tier: database
-spec:
-  clusterIP: None  # Headless service for StatefulSet
-  ports:
-    - port: 3306
-      targetPort: 3306
-  selector:
-    app: todolist-app
-    tier: database
+  name: sql
 ---
-# -------------------------
 # MySQL Secret
-# -------------------------
 apiVersion: v1
 kind: Secret
 metadata:
   name: mysql-secret
+  namespace: sql
 type: Opaque
 data:
-  mysql-root-pass: b21hcjEyMzQ=  # omar1234 in base64
+  mysql-root-pass: b21hcjEyMzQ=  # omar1234 base64
 ---
-# -------------------------
 # MySQL Persistent Volume
-# -------------------------
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -44,13 +27,12 @@ spec:
   hostPath:
     path: /mnt/data/mysql
 ---
-# -------------------------
 # MySQL Persistent Volume Claim
-# -------------------------
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-pvc
+  namespace: sql
 spec:
   storageClassName: fast
   accessModes:
@@ -59,13 +41,27 @@ spec:
     requests:
       storage: 1Gi
 ---
-# -------------------------
+# MySQL Headless Service (for StatefulSet)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: sql
+spec:
+  clusterIP: None
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: todolist-app
+    tier: database
+---
 # MySQL StatefulSet
-# -------------------------
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mysql-statefulset
+  namespace: sql
   labels:
     app: todolist-app
     tier: database
