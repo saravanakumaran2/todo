@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: backend
 ---
-# Backend Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,10 +25,9 @@ spec:
     spec:
       containers:
         - name: backend-container
-          image: joselin721/backend
+          image: joselin721/backend:latest
           ports:
             - containerPort: 8081
-              name: webserver-port
           env:
             - name: MYSQL_HOST
               value: mysql.sql.svc.cluster.local
@@ -43,22 +41,16 @@ spec:
                   name: mysql-secret
                   key: mysql-root-pass
                   optional: true
-                  # note: secret is in 'sql' namespace, might need to duplicate or use ExternalSecret
 ---
-# Backend Service (ClusterIP)
 apiVersion: v1
 kind: Service
 metadata:
   name: backend-svc
   namespace: backend
-  labels:
-    app: todolist-app
-    tier: backend
 spec:
   type: ClusterIP
   ports:
-    - protocol: TCP
-      port: 8081
+    - port: 8081
       targetPort: 8081
   selector:
     app: todolist-app
