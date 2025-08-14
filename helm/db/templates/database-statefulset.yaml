@@ -1,8 +1,14 @@
+# ----------------------------
+# Namespace
+# ----------------------------
 apiVersion: v1
 kind: Namespace
 metadata:
   name: sql
 ---
+# ----------------------------
+# MySQL Secret
+# ----------------------------
 apiVersion: v1
 kind: Secret
 metadata:
@@ -10,18 +16,49 @@ metadata:
   namespace: sql
 type: Opaque
 data:
-  mysql-root-pass: b21hcjEyMzQ=  # base64('omar1234')
+  mysql-root-pass: b21hcjEyMzQ=  # base64 for "omar1234"
 ---
+# ----------------------------
+# Persistent Volume
+# ----------------------------
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data/mysql
+---
+# ----------------------------
+# Persistent Volume Claim
+# ----------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: sql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: mysql-pv   # Bind to the PV above
+---
+# ----------------------------
+# Headless Service for MySQL
+# ----------------------------
 apiVersion: v1
 kind: Service
 metadata:
   name: mysql
   namespace: sql
-  labels:
-    app: todolist-app
-    tier: database
 spec:
-  clusterIP: None           # Headless for StatefulSet
+  clusterIP: None
   ports:
     - port: 3306
       targetPort: 3306
@@ -29,15 +66,9 @@ spec:
     app: todolist-app
     tier: database
 ---
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: fast
-provisioner: docker.io/hostpath
-volumeBindingMode: Immediate
-parameters:
-  type: pd-ssd
----
+# ----------------------------
+# StatefulSet using static PVC
+# ----------------------------
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -61,7 +92,7 @@ spec:
     spec:
       containers:
         - name: mysql-container
-          image: joselin721/database
+          image: joselin721/database:latest
           ports:
             - containerPort: 3306
           env:
@@ -73,12 +104,8 @@ spec:
           volumeMounts:
             - name: mysql-storage
               mountPath: /var/lib/mysql
-  volumeClaimTemplates:
-    - metadata:
-        name: mysql-storage
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        storageClassName: fast
-        resources:
-          requests:
-            storage: 1Gi
+  volumeClaimTemplates: []  # Not using templates, we use static PVC
+  volumes:
+    - name: mysql-storage
+      persistentVolumeClaim:
+        claimName: mysql-pvc
