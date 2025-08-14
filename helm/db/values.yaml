@@ -1,0 +1,18 @@
+app: todolist-app
+namespace: sql
+
+database:
+  name: mysql
+  tier: database
+  image: joselin721/database
+  containerPort: 3306
+  service:
+    name: mysql
+    port: 3306
+    clusterIP: None           # headless ok for StatefulSet
+  pvc:
+    name: mysql-pvc
+    storageClass: fast
+    storageSize: 1Gi
+  secretName: mysql-secret
+  rootPassword: b21hcjEyMzQ=  # base64('omar1234')

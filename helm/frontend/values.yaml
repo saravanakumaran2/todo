@@ -1,0 +1,22 @@
+app: todolist-app
+namespace: frontend
+
+frontend:
+  name: frontend
+  replicas: 1
+  image: joselin721/frontend
+  # App is actually serving on 4173 (from logs)
+  containerPort: 4173
+  service:
+    name: frontend-svc
+    type: NodePort
+    # Keep external port 3000 if you want, it will map to 4173 in the pod
+    port: 3000
+    nodePort: 30000
+
+# For templating backend URL in frontend env (used below)
+backend:
+  namespace: backend
+  service:
+    name: backend-svc
+    port: 8081
