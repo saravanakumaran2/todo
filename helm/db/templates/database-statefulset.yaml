@@ -3,7 +3,6 @@ kind: Namespace
 metadata:
   name: sql
 ---
-# MySQL Secret
 apiVersion: v1
 kind: Secret
 metadata:
@@ -11,9 +10,8 @@ metadata:
   namespace: sql
 type: Opaque
 data:
-  mysql-root-pass: b21hcjEyMzQ=  # omar1234 base64
+  mysql-root-pass: b21hcjEyMzQ=  # "omar1234" base64
 ---
-# MySQL Persistent Volume
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -27,7 +25,6 @@ spec:
   hostPath:
     path: /mnt/data/mysql
 ---
-# MySQL Persistent Volume Claim
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -41,7 +38,6 @@ spec:
     requests:
       storage: 1Gi
 ---
-# MySQL Headless Service (for StatefulSet)
 apiVersion: v1
 kind: Service
 metadata:
@@ -51,20 +47,15 @@ spec:
   clusterIP: None
   ports:
     - port: 3306
-      targetPort: 3306
   selector:
     app: todolist-app
     tier: database
 ---
-# MySQL StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mysql-statefulset
   namespace: sql
-  labels:
-    app: todolist-app
-    tier: database
 spec:
   serviceName: mysql
   replicas: 1
@@ -80,10 +71,9 @@ spec:
     spec:
       containers:
         - name: mysql-container
-          image: joselin721/database
+          image: joselin721/database:latest
           ports:
             - containerPort: 3306
-              name: mysql-port
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
@@ -93,7 +83,11 @@ spec:
           volumeMounts:
             - name: mysql-vol
               mountPath: /var/lib/mysql
-      volumes:
-        - name: mysql-vol
-          persistentVolumeClaim:
-            claimName: mysql-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-vol
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
