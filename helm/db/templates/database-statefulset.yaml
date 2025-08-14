@@ -1,3 +1,6 @@
+# -------------------------
+# MySQL Service
+# -------------------------
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,7 +9,7 @@ metadata:
     app: todolist-app
     tier: database
 spec:
-  clusterIP: None
+  clusterIP: None  # Headless service for StatefulSet
   ports:
     - port: 3306
       targetPort: 3306
@@ -14,14 +17,20 @@ spec:
     app: todolist-app
     tier: database
 ---
+# -------------------------
+# MySQL Secret
+# -------------------------
 apiVersion: v1
 kind: Secret
 metadata:
   name: mysql-secret
 type: Opaque
 data:
-  mysql-root-pass: b21hcjEyMzQ=  # omar1234 base64
+  mysql-root-pass: b21hcjEyMzQ=  # omar1234 in base64
 ---
+# -------------------------
+# MySQL Persistent Volume
+# -------------------------
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -35,6 +44,9 @@ spec:
   hostPath:
     path: /mnt/data/mysql
 ---
+# -------------------------
+# MySQL Persistent Volume Claim
+# -------------------------
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -47,6 +59,9 @@ spec:
     requests:
       storage: 1Gi
 ---
+# -------------------------
+# MySQL StatefulSet
+# -------------------------
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -63,7 +78,6 @@ spec:
       tier: database
   template:
     metadata:
-      name: mysql-pod
       labels:
         app: todolist-app
         tier: database
@@ -74,13 +88,6 @@ spec:
           ports:
             - containerPort: 3306
               name: mysql-port
-          resources:
-            limits:
-              cpu: "500m"
-              memory: 1Gi
-            requests:
-              cpu: "500m"
-              memory: 1Gi
           env:
             - name: MYSQL_ROOT_PASSWORD
               valueFrom:
