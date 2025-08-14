@@ -1,50 +1,50 @@
+---
+# -------------------------
+# Frontend Deployment
+# -------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
   labels:
     app: todolist-app
+    tier: frontend
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: todolist-app
       tier: frontend
-#  strategy:
-#    type: Recreate
   template:
     metadata:
-      name: react-pod
       labels:
         app: todolist-app
         tier: frontend
     spec:
       containers:
-      - image: joselin721/frontend
-        name: frontend-container
-        ports:
-        - containerPort: 4173
-          name: react-app-port
+        - name: frontend-container
+          image: joselin721/frontend
+          ports:
+            - containerPort: 4173
+              name: react-app-port
 ---
+# -------------------------
+# Frontend Service (NodePort)
+# -------------------------
 apiVersion: v1
 kind: Service
 metadata:
-  name: frontend 
+  name: frontend
   labels:
     app: todolist-app
     tier: frontend
 spec:
   type: NodePort
   ports:
-    - protocol: TCP 
+    - protocol: TCP
       port: 4173
       targetPort: 4173
       nodePort: 30000
   selector:
     app: todolist-app
     tier: frontend
-
-
-
-
-
-
